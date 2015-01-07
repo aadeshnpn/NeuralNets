@@ -22,9 +22,19 @@ function pred=predict(theta,X)
   pred=round(sigmoid(X*theta));
 endfunction
 
-function [theta,cost]=callFminunc(theta,X,y)
+function [theta,cost,exit_flag]=callFminunc(theta,X,y,lamda)
   options=optimset('GradObj','on','MaxIter',400);
-  [theta,cost]=fminunc(@(t)(costFunction(t, X, y)),theta, options);
+[theta,cost,exit_flag]=fminunc(@(t)(costFunctionReg(t, X, y,lamda)),theta, options);
+endfunction
+
+function [cost,grad]=costFunctionReg(theta,X,y,lamda)
+  m=length(y);
+  cost=0;
+  grad=zeros(size(theta));
+  [cost,grad]=costFunction(theta,X,y);
+  penalize=sum(theta(2:end) .^2);
+  cost=cost+lamda/(2*m)*penalize;
+  grad(2:end)=grad(2:end)+(lamda/m)*theta(2:end);
 endfunction
 
 function [cost,grad]=costFunction(theta,X,y)
@@ -50,11 +60,11 @@ function [m,n,X,initial_theta]=manupulateData(X)
   X=[ones(m,1) X];
   initial_theta=zeros(n+1,1);
 endfunction
-
+lamda=1;
 [maindata,label]=loadData(source_fname);
 [m,n,X,theta]=manupulateData(maindata);
-[cost,grad]=costFunction(theta,X,label);
-[thetafinal,costfinal]=callFminunc(theta,X,label);
+%[cost,grad]=costFunction(theta,X,label);
+[thetafinal,costfinal,exit_flag]=callFminunc(theta,X,label,lamda);
 %%Regression completed
 
 %Time for prediction
