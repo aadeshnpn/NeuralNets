@@ -1,5 +1,7 @@
 %%%%Implementation of Logistic Regression on Iris Dataset
 %%%%@Author: Aadesh Neupane
+%%%%Codes over here are based on Prof. Andrew Ng ML Class
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 1;
 printf("Usages: octave logisticReg.m training.csv test.csv\n");
 printf ("\n");
@@ -60,7 +62,7 @@ function [m,n,X,initial_theta]=manupulateData(X)
   X=[ones(m,1) X];
   initial_theta=zeros(n+1,1);
 endfunction
-lamda=1;
+lamda=0.8;
 [maindata,label]=loadData(source_fname);
 [m,n,X,theta]=manupulateData(maindata);
 %[cost,grad]=costFunction(theta,X,label);
