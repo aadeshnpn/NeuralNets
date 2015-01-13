@@ -6,23 +6,38 @@ arg_list = argv();
 for i = 1:nargin
   printf ("%s", arg_list{i});
   source_fname=arg_list{i};
-test_fname=arg_list{i};
+  test_fname=arg_list{i};
 endfor
 printf ("\n");
+
+function pred=predict(theta1,theta2,X)
+  m=size(X,1);
+  num_lab=size(theta2,1);
+  pred=zeros(size(X,1),1);
+  h1=sigmoid([ones(m,1) X]*theta1');
+  h2=sigmoid([ones(m,1) h1]*theta2');
+  [dummy, pred]=max(h2,[],2);
+endfunction
+
+function m= randInitWeight(m_in,m_out)
+  m=zeros(m_out,1+m_in);
+  eplison_init=0.12;
+  m=rand(m_out,1+m_in)*2*eplison_init-eplison_init;
+endfunction
 
 function sigm=sigmoid(z)
   sigm=zeros(size(z));
   sigm=1./(1+e .^ -z);
 endfunction
 
-function sigGrad=sigmoidGradient(z)
-  g=zeros(size(z));
-  g=sigmoid(z).*(1-sigmoid(z));
-endfunction
-
-function [cost grad]=nnCostFunc(theta1,theta2,input_layer_size,hidden_layer_size,num_labels,X,y,lamda)
+function [cost grad]=nnCostFunc(nn_para,input_layer_size,hidden_layer_size,num_labels,X,y,lamda)
   m=size(X,1);
-  cost=0;
+  cost=0.01;
+  theta1 = reshape(nn_para(1:hidden_layer_size * (input_layer_size + 1)), ...
+                 hidden_layer_size, (input_layer_size + 1));
+
+  theta2 = reshape(nn_para((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
+                 num_labels, (hidden_layer_size + 1));
   theta1_grad=zeros(size(theta1));
   theta2_grad=zeros(size(theta2));
   no_of_classes=length(unique(y));
@@ -60,19 +75,31 @@ num_labels=3;
 [X,y]=loadData(source_fname);
 m=size(X,1);
 n=size(y,1);
-theta1=rand(hidden_layer_size,input_layer_size+1);
-theta2=rand(num_labels,hidden_layer_size+1);
-lamda=0;
+init_theta1=randInitWeight(input_layer_size,hidden_layer_size);
+init_theta2=randInitWeight(hidden_layer_size,num_labels);
+init_nn_paras=[init_theta1(:) ; init_theta2(:)];
+
+lamda=1;
 %%size(theta1)
 %%size(theta2)
-%%nn_params=[theta1(:);theta2(:)];
+
 
 %%Feed forward neural networks implementaion
-cost=nnCostFunc(theta1,theta2,input_layer_size,hidden_layer_size,num_labels,X,y,lamda);
-cost
+#cost=nnCostFunc(nn_para,input_layer_size,hidden_layer_size,num_labels,X,y,lamda);
+#cost;
+options=optimset('MaxIter',4);
 
-%%Sigmoid Gradient
-%%sigGra=sigmoidGradient([1 -0.5 0 0.5 1]);
+#costFunc=@(p) nnCostFunc();
+[nn_params,cost]=fminunc(@(p)(nnCostFunc(p,input_layer_size,hidden_layer_size,num_labels,X,y,lamda)),init_nn_paras,options);
+nn_params;
+cost;
+theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
+                 hidden_layer_size, (input_layer_size + 1));
 
-%%
+theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
+                 num_labels, (hidden_layer_size + 1));
 
+
+[X,y]=loadData(test_fname);
+pred=predict(theta1,theta2,X);
+fprintf('\nTraining Accuracy: %f\n', mean(double(pred == y)) * 100);
