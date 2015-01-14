@@ -1,5 +1,7 @@
 %%%%Implementation of Feed Forward Neural Networks
 %%%%@Author: Aadesh Neupane
+%%%%Codes over here are based on Prof. Andrew Ng ML Class
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 1;
 
 arg_list = argv();
@@ -79,7 +81,7 @@ init_theta1=randInitWeight(input_layer_size,hidden_layer_size);
 init_theta2=randInitWeight(hidden_layer_size,num_labels);
 init_nn_paras=[init_theta1(:) ; init_theta2(:)];
 
-lamda=1;
+lamda=0.1;
 %%size(theta1)
 %%size(theta2)
 
@@ -87,7 +89,7 @@ lamda=1;
 %%Feed forward neural networks implementaion
 #cost=nnCostFunc(nn_para,input_layer_size,hidden_layer_size,num_labels,X,y,lamda);
 #cost;
-options=optimset('MaxIter',4);
+options=optimset('MaxIter',100);
 
 #costFunc=@(p) nnCostFunc();
 [nn_params,cost]=fminunc(@(p)(nnCostFunc(p,input_layer_size,hidden_layer_size,num_labels,X,y,lamda)),init_nn_paras,options);
